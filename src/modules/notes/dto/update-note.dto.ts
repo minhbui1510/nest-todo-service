@@ -1,12 +1,4 @@
-import { IsOptional } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateNoteDto } from './create-note.dto';
 
-export class UpdateNoteDto {
-  @ApiPropertyOptional({ example: 'Tiêu đề mới' })
-  @IsOptional()
-  title?: string;
-
-  @ApiPropertyOptional({ example: 'Nội dung mới' })
-  @IsOptional()
-  content?: string;
-}
+export class UpdateNoteDto extends PartialType(CreateNoteDto) {}

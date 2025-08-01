@@ -35,3 +35,5 @@ Thumbs.db
 .env.local
 .env.development
 .env.production
+
+/generated/prisma

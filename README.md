@@ -18,7 +18,7 @@ A simple RESTful API for managing notes, built with [NestJS](https://nestjs.com/
 - [Swagger](https://swagger.io/)
 - [Express](https://expressjs.com/)
 - [Class-validator](https://github.com/typestack/class-validator)
-
+- [Prisma](https://www.prisma.io/)
 ---
 
 ## 🔧 Installation
@@ -33,3 +33,12 @@ npm install
 
 # Run in dev mode
 npm run start:dev
+
+# Prisma Setup in NestJS
+
+## 1. Install Prisma and Initialize
+
+```bash
+npm install prisma --save-dev
+npm install @prisma/client
+npx prisma init
