@@ -30,3 +30,8 @@ Thumbs.db
 # Compiled files (in case someone compiles JS to same folder)
 *.js
 *.js.map
+
+# Environment example
+.env.local
+.env.development
+.env.production
