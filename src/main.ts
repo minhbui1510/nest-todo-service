@@ -15,7 +15,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config, {
     // ⚠️ BẮT BUỘC nếu không sẽ lỗi 'relatedModules undefined'
   });
-
+app.enableCors({
+    origin: '*', // <-- hoặc '*' nếu phát triển
+  });
   SwaggerModule.setup('api', app, document);
   await app.listen(3000);
 }
