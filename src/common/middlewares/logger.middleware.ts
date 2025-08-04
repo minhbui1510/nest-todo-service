@@ -1,0 +1,15 @@
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import {RequestContextService} from "../context/request-context/request-context.service";
+
+@Injectable()
+export class LoggerMiddleware implements NestMiddleware {
+ constructor(private readonly context: RequestContextService) {}
+
+  use(req: Request, res: Response, next: NextFunction) {
+    const requestId =
+      req.headers['x-request-id']?.toString() || Date.now().toString();
+
+    this.context.run(requestId, next);
+  }
+}

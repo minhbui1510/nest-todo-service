@@ -1,29 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
-import {PrismaService} from "../../prisma/prisma.service";
+import { PrismaService } from '../../prisma/prisma.service';
+import { BaseService } from '../../common/base/base.service';
+import {RequestContextService} from "../../common/context/request-context/request-context.service"; // hoặc nơi bạn lưu file
 
 @Injectable()
-export class NotesService {
-  constructor(private prisma: PrismaService) {}
-
-  create(dto: CreateNoteDto) {
-    return this.prisma.note.create({ data: dto });
+export class NotesService extends BaseService {
+  constructor(
+    private readonly prisma: PrismaService,
+    protected readonly context: RequestContextService, // 👈 inject từ Nest container
+  ) {
+    super(context); // 👈 truyền context vào BaseService
   }
 
-  findAll() {
-    return this.prisma.note.findMany();
+  async create(dto: CreateNoteDto) {
+    try {
+      return await this.prisma.note.create({ data: dto });
+    } catch (err) {
+      this.handleError(err, 'create');
+    }
   }
 
-  findOne(id: number) {
-    return this.prisma.note.findUnique({ where: { id } });
+  async findAll() {
+    try {
+      return await this.prisma.note.findMany();
+    } catch (err) {
+      this.handleError(err, 'findAll');
+    }
   }
 
-  update(id: number, dto: UpdateNoteDto) {
-    return this.prisma.note.update({ where: { id }, data: dto });
+  async findOne(id: number) {
+    try {
+      return await this.prisma.note.findUnique({ where: { id } });
+    } catch (err) {
+      this.handleError(err, 'findOne');
+    }
   }
 
-  remove(id: number) {
-    return this.prisma.note.delete({ where: { id } });
+  async update(id: number, dto: UpdateNoteDto) {
+    try {
+      return await this.prisma.note.update({ where: { id }, data: dto });
+    } catch (err) {
+      this.handleError(err, 'update');
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      return await this.prisma.note.delete({ where: { id } });
+    } catch (err) {
+      this.handleError(err, 'remove');
+    }
   }
 }

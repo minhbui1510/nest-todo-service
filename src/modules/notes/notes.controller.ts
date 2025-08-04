@@ -2,10 +2,11 @@ import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import {ApiTags, ApiResponse, ApiSecurity} from '@nestjs/swagger';
 import { Note } from './entities/note.entity';
 
 @ApiTags('notes') // 👈 Nhóm route trong Swagger
+@ApiSecurity('x-api-key')
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
