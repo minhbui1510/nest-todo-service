@@ -3,7 +3,7 @@ import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import {ApiTags, ApiResponse, ApiSecurity} from '@nestjs/swagger';
-import { Note } from './entities/note.entity';
+import { Note } from '../../entities/note.entity';
 import {TrimPipe} from "../../common/pipe/trim.pipe";
 import {ApiError} from "../../common/decorator/api-error.decorator";
 
