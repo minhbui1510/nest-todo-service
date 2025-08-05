@@ -8,6 +8,7 @@ import { MiddlewaresModule } from './common/middlewares/middlewares.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ApiKeyMiddleware } from './common/middlewares/api-key.middleware';
 import { RequestContextModule } from './common/context/request-context/request-context.module';
+import { PipeModule } from './common/pipe/pipe.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -15,6 +16,7 @@ import { RequestContextModule } from './common/context/request-context/request-c
     NotesModule,
     PrismaModule,
     RequestContextModule,
+    PipeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

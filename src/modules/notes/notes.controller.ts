@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import {Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, UsePipes} from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import {ApiTags, ApiResponse, ApiSecurity} from '@nestjs/swagger';
 import { Note } from './entities/note.entity';
+import {TrimPipe} from "../../common/pipe/trim.pipe";
+import {ApiError} from "../../common/decorator/api-error.decorator";
 
 @ApiTags('notes') // 👈 Nhóm route trong Swagger
 @ApiSecurity('x-api-key')
@@ -13,7 +15,9 @@ export class NotesController {
 
   @Post()
   @ApiResponse({ status: 201, description: 'Tạo ghi chú', type: Note })
+  @ApiError(400, 'Dữ liệu không hợp lệ', '/notes')
   create(@Body() dto: CreateNoteDto) {
+    console.log('🎯 DTO:', dto);
     return this.notesService.create(dto);
   }
 

@@ -16,10 +16,32 @@ model users {
 }
 
 model Note {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
   content   String
-  createdAt DateTime @default(now()) @db.Timestamp(6)
-  updatedAt DateTime @updatedAt @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+  tag       TagNote[]
+  @@index([createdAt], name: "idx_created_at")
 }
 
+model Tag {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  tag_color   String
+  tag_content String
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  note        TagNote[]
+}
+
+model TagNote {
+  tagId     Int
+  noteId    Int
+  createdAt DateTime @default(now())
+
+  note Note @relation(fields: [noteId], references: [id])
+  tag  Tag  @relation(fields: [tagId], references: [id])
+
+  @@id([tagId, noteId])
+  @@index([noteId])
+}
