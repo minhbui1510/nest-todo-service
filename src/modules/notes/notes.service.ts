@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../common/context/prisma.service';
 import { BaseService } from '../../common/base/base.service';
-import {RequestContextService} from "../../common/context/request-context/request-context.service"; // hoặc nơi bạn lưu file
+import {RequestContextService} from "../../common/context/request-context.service"; // hoặc nơi bạn lưu file
 
 @Injectable()
 export class NotesService extends BaseService {

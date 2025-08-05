@@ -17,7 +17,6 @@ export class NotesController {
   @ApiResponse({ status: 201, description: 'Tạo ghi chú', type: Note })
   @ApiError(400, 'Dữ liệu không hợp lệ', '/notes')
   create(@Body() dto: CreateNoteDto) {
-    console.log('🎯 DTO:', dto);
     return this.notesService.create(dto);
   }
 

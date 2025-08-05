@@ -11,7 +11,6 @@ export class ApiKeyMiddleware implements NestMiddleware {
     if (apiKey !== process.env.API_KEY) {
       throw new UnauthorizedException('Invalid API key');
     }
-    console.log('✅ API key accepted');
     next();
   }
 }

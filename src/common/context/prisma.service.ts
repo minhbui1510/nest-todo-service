@@ -1,9 +1,10 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import {RequestContextService} from "./request-context.service";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  constructor() {
+  constructor(private readonly requestContext: RequestContextService) {
     super({
       log: ['query', 'info', 'warn', 'error'],
     });

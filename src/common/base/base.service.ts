@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {RequestContextService} from "../context/request-context/request-context.service";
+import {RequestContextService} from "../context/request-context.service";
 
 export class BaseService {
   protected readonly logger: Logger;

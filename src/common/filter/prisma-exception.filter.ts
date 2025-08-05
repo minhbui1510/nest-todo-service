@@ -7,7 +7,7 @@ import {
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import { prismaErrorMap } from '../errors/prisma-error.map';
-import {RequestContextService} from "../context/request-context/request-context.service";
+import {RequestContextService} from "../context/request-context.service";
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
@@ -18,7 +18,6 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const requestId = this.context.getRequestId();
-
     const errorCode = exception.code;
     const fallback = {
       code: 'UNKNOWN_ERROR',
@@ -39,6 +38,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     console.error('🔥 Prisma error caught:', {
       code: errorCode,
       message: exception.message,
+        requestId: requestId,
     });
 
     response.status(HttpStatus.BAD_REQUEST).json(errorResponse);

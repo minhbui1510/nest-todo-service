@@ -2,10 +2,10 @@ import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {SwaggerModule, DocumentBuilder} from '@nestjs/swagger';
 import {ConfigService} from '@nestjs/config';
-import {HttpExceptionFilter} from "./common/http/http.filter";
-import {PrismaExceptionFilter} from "./common/prisma-exception/prisma-exception.filter";
+import {HttpExceptionFilter} from "./common/filter/http.filter";
+import {PrismaExceptionFilter} from "./common/filter/prisma-exception.filter";
 import {RequestIdInterceptor} from "./common/interceptor/request-id.interceptor";
-import {RequestContextService} from "./common/context/request-context/request-context.service";
+import {RequestContextService} from "./common/context/request-context.service";
 import {BadRequestException, ValidationPipe} from "@nestjs/common";
 import {TrimPipe} from "./common/pipe/trim.pipe";
 
@@ -14,8 +14,6 @@ async function bootstrap() {
 
     const configService = app.get(ConfigService);
     const apiKey = configService.get<string>('API_KEY');
-
-    console.log('🔑 Loaded API_KEY:', apiKey);
 
     const config = new DocumentBuilder()
         .setTitle('My API')
@@ -27,8 +25,8 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
     app.useGlobalFilters(
-        new HttpExceptionFilter(app.get(RequestContextService)),
-        new PrismaExceptionFilter(app.get(RequestContextService)));
+        new PrismaExceptionFilter(app.get(RequestContextService))),
+        new HttpExceptionFilter(app.get(RequestContextService));
     app.useGlobalInterceptors(
         new RequestIdInterceptor(app.get(RequestContextService)),
     );
@@ -47,6 +45,7 @@ async function bootstrap() {
 
                 return new BadRequestException({
                     errors: result,
+                    requestId: app.get(RequestContextService).getRequestId(),
                 });
             },
         }),
