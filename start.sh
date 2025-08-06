@@ -1,10 +1,14 @@
 #!/bin/sh
 set -e
 
-echo "⏳ Waiting for PostgreSQL (db:5432)..."
+# Chọn host dựa vào biến môi trường
+DB_HOST=${DB_HOST:-db}
+DB_PORT=${DB_PORT:-5432}
+
+echo "⏳ Waiting for PostgreSQL ($DB_HOST:$DB_PORT)..."
 
 for i in $(seq 1 20); do
-  if nc -z db 5432; then
+  if nc -z $DB_HOST $DB_PORT; then
     echo "✅ DB is ready!"
     break
   fi
@@ -12,7 +16,7 @@ for i in $(seq 1 20); do
   sleep 1
 done
 
-if ! nc -z db 5432; then
+if ! nc -z $DB_HOST $DB_PORT; then
   echo "❌ PostgreSQL not ready after 20 seconds. Exiting."
   exit 1
 fi
