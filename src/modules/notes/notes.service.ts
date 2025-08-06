@@ -6,7 +6,8 @@ import {BaseService} from '../../common/base/base.service';
 import {RequestContextService} from "../../common/context/request-context.service";
 import {TagsNoteService} from "../tags-note/tags-note.service";
 import {OmitType} from "@nestjs/swagger";
-import {TagsService} from "../tags/tags.service"; // hoặc nơi bạn lưu file
+import {TagsService} from "../tags/tags.service";
+import {FindByTagDto} from "./dto/find-by-tag.dto"; // hoặc nơi bạn lưu file
 
 @Injectable()
 export class NotesService extends BaseService {
@@ -84,6 +85,47 @@ export class NotesService extends BaseService {
             }));
         } catch (err) {
             this.handleError(err, 'findAll');
+        }
+    }
+
+    async findAllByTag(tag: FindByTagDto) {
+        try {
+            const notes = await this.prisma.note.findMany({
+                where: {
+                    tag: {
+                        some: {
+                            tag: {
+                                name: tag.tagName,
+                            },
+                        },
+                    },
+                },
+                include: {
+                    tag: {
+                        include: {
+                            // 'tag' bên trong là quan hệ TagNote -> Tag
+                            tag: {
+                                select: {
+                                    name: true,
+                                    tag_color: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            return notes.map((n) => ({
+                ...n,
+                tag: n.tag.map((tn) => ({
+                    tagId: tn.tagId,
+                    noteId: tn.noteId,
+                    createdAt: tn.createdAt,
+                    tagName: tn.tag?.name ?? null,
+                    tagColor: tn.tag?.tag_color ?? null,
+                })),
+            }));
+        } catch (err) {
+            this.handleError(err, 'findAllByTag');
         }
     }
 

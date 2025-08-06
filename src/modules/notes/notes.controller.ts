@@ -6,6 +6,7 @@ import {ApiTags, ApiResponse, ApiSecurity} from '@nestjs/swagger';
 import { Note } from '../../entities/note.entity';
 import {TrimPipe} from "../../common/pipe/trim.pipe";
 import {ApiError} from "../../common/decorator/api-error.decorator";
+import {FindByTagDto} from "./dto/find-by-tag.dto";
 
 @ApiTags('notes') // 👈 Nhóm route trong Swagger
 @ApiSecurity('x-api-key')
@@ -44,4 +45,11 @@ export class NotesController {
     this.notesService.remove(id);
     return { message: 'Đã xóa ghi chú' };
   }
+    @UsePipes(new TrimPipe())
+    @Post('getByTag')
+    @ApiResponse({ status: 200, description: 'Lấy ghi chú theo tag', type: Note })
+    getByTag(@Body() tag: FindByTagDto) {
+      console.log(tag)
+        return this.notesService.findAllByTag(tag);
+    }
 }
