@@ -1,59 +1,65 @@
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
-import {SwaggerModule, DocumentBuilder} from '@nestjs/swagger';
-import {ConfigService} from '@nestjs/config';
-import {HttpExceptionFilter} from "./common/filter/http.filter";
-import {PrismaExceptionFilter} from "./common/filter/prisma-exception.filter";
-import {RequestIdInterceptor} from "./common/interceptor/request-id.interceptor";
-import {RequestContextService} from "./common/context/request-context.service";
-import {BadRequestException, ValidationPipe} from "@nestjs/common";
-import {TrimPipe} from "./common/pipe/trim.pipe";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import { HttpExceptionFilter } from './common/filter/http.filter';
+import { RequestIdInterceptor } from './common/interceptor/request-id.interceptor';
+import { RequestContextService } from './common/context/request-context.service';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { TrimPipe } from './common/pipe/trim.pipe';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-    const configService = app.get(ConfigService);
-    const apiKey = configService.get<string>('API_KEY');
+  const configService = app.get(ConfigService);
+  const requestContext = app.get(RequestContextService);
 
-    const config = new DocumentBuilder()
-        .setTitle('My API')
-        .setDescription('Demo Swagger + API Key')
-        .setVersion('1.0')
-        .addApiKey({type: 'apiKey', name: 'x-api-key', in: 'header'}, 'x-api-key')
-        .build();
+  // ✅ Swagger setup
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('My API')
+    .setDescription('Demo Swagger + API Key')
+    .setVersion('1.0')
+    .addBearerAuth() // 👈 Nếu dùng JWT, thêm vào
+    .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
-    app.useGlobalFilters(
-        new PrismaExceptionFilter(app.get(RequestContextService))),
-        new HttpExceptionFilter(app.get(RequestContextService));
-    app.useGlobalInterceptors(
-        new RequestIdInterceptor(app.get(RequestContextService)),
-    );
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            forbidNonWhitelisted: true,
-            transform: true,
-            exceptionFactory: (errors) => {
-                const result = {};
-                errors.forEach((error) => {
-                    if (error.constraints) {
-                        result[error.property] = Object.values(error.constraints);
-                    }
-                });
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, document);
 
-                return new BadRequestException({
-                    errors: result,
-                    requestId: app.get(RequestContextService).getRequestId(),
-                });
-            },
-        }),
-        new TrimPipe()
-    );
+  // ✅ Global Filters (SỬA LỖI NGOẶC TẠI ĐÂY)
+  app.useGlobalFilters(
+    new HttpExceptionFilter(requestContext),
+  );
 
-    app.enableCors("*")
-    await app.listen(3000);
+  // ✅ Global Interceptors
+  app.useGlobalInterceptors(
+    new RequestIdInterceptor(requestContext),
+  );
+
+  // ✅ Global Pipes
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      exceptionFactory: (errors) => {
+        const result = {};
+        errors.forEach((error) => {
+          if (error.constraints) {
+            result[error.property] = Object.values(error.constraints);
+          }
+        });
+
+        return new BadRequestException({
+          errors: result,
+          requestId: requestContext.getRequestId(),
+        });
+      },
+    }),
+    new TrimPipe()
+  );
+
+  app.enableCors("*"); // bạn có thể truyền options thay vì "*"
+  await app.listen(3000);
 }
 
 bootstrap();
