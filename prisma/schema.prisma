@@ -16,14 +16,15 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-
 model Note {
   id        Int       @id @default(autoincrement())
   title     String
   content   String
+  createdBy String
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @updatedAt @db.Timestamp(6)
   tag       TagNote[]
+
   @@index([createdAt], name: "idx_created_at")
 }
 

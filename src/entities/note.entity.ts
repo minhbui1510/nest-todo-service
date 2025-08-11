@@ -11,6 +11,9 @@ export class Note {
   content: string;
 
   @ApiProperty()
+  createdBy: string;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
