@@ -19,37 +19,63 @@ export class NotesService extends BaseService {
     super(context); // 👈 truyền context vào BaseService
   }
 
-  async create(userId: number, dto: CreateNoteDto) {
-    try {
-      const newNote = await this.prisma.note.create({
+async create(userId: number, dto: CreateNoteDto) {
+  try {
+    return await this.prisma.$transaction(async (tx) => {
+      // 1) Tạo note
+      const note = await tx.note.create({
         data: {
           title: dto.title,
           content: dto.content,
-          createdBy: String(userId)
+          createdBy: String(userId), // nếu đã chuyển sang quan hệ: dùng authorId: userId
         },
       });
 
-      if (newNote?.id && Array.isArray(dto.tagId) && dto.tagId.length > 0) {
-        // Kiểm tra tất cả tagId có tồn tại
-        const tags = await this.prisma.tag.findMany({
+      // 2) Gắn tag (nếu có)
+      if (dto.tagId?.length) {
+        // Lọc tag hợp lệ
+        const validTags = await tx.tag.findMany({
           where: { id: { in: dto.tagId } },
           select: { id: true },
         });
 
-        const existingTagIds = tags.map((t) => t.id);
-
-        // Gắn từng tag tồn tại
-        await this.tagsNoteService.attachMany(existingTagIds, newNote.id);
+        if (validTags.length) {
+          // Tạo bản ghi nối, bỏ qua trùng (tránh P2002)
+          await tx.tagNote.createMany({
+            data: validTags.map((t) => ({ tagId: t.id, noteId: note.id })),
+            skipDuplicates: true,
+          });
+        }
       }
 
-      return await this.prisma.note.findUnique({
-        where: { id: newNote.id },
-        include: { tag: true }, // chỉ có tác dụng nếu quan hệ 1-1
+      // 3) Trả về note đầy đủ
+      const full = await tx.note.findUnique({
+        where: { id: note.id },
+        include: {
+          tag: {
+            include: {
+              tag: { select: { name: true, tag_color: true } },
+            },
+          },
+        },
       });
-    } catch (err) {
-      this.handleError(err, 'create');
-    }
+
+      return {
+        ...full,
+        tag: full?.tag.map((tn) => ({
+          tagId: tn.tagId,
+          noteId: tn.noteId,
+          createdAt: tn.createdAt,
+          tagName: tn.tag?.name ?? null,
+          tagColor: tn.tag?.tag_color ?? null,
+        })),
+      };
+    });
+  } catch (err) {
+    // Giữ nguyên cơ chế tập trung lỗi của bạn
+    this.handleError(err, 'create');
   }
+}
 
 
   async findAll() {
